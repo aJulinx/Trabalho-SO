@@ -4,31 +4,18 @@
 #include <conio.h>
 #include <time.h>
 #include <malloc.h>
+#include <pthread.h>
 
-
+#define NUM_THREADS 1 /* define o numero de threads */
 #define ROWS 10
 #define COLS 10
-//Variavel Global
+
+/* variavel global */
 int contPrimosTotal = 0;
 
-
-int ehPrimo(int numero) {
-    int cont = 0;
-    int raiz = sqrt(numero);
-    for (int i = 0; i <= raiz; i++) {
-        if (numero % i == 0) {
-            return 1;
-        }
-    }
-
-    /*if (cont == 1) {
-        printf("O numero %d eh primo ", &numero);
-        printf("");
-        return 1;
-    }*/
-
-    return 0;
-}
+/* funcoes globais */
+int ehPrimo(int numero);
+int sondagem(macrobloco[i][j]);
 
 int** Alocar_matriz_real() {
     int** p;
@@ -96,11 +83,14 @@ int main() {
             matriz[i][j] = rand() % 100;
         }
     }
-    
-    for (int i = 0; i < ROWS; i++) { //Preenchendo a matriz
-        for (int j = 0; j < COLS; j++) {
-            contPrimos += ehPrimo(matriz[i][j]);
-        }
+
+    /* criação das threads (também num loop for)*/
+    /* CRIACAO DOS MACROBLOCOS */
+    for (int i = 1; i <= NUM_THREADS; i++){
+    	pthread_t tid; /* o identificador da thread */
+    	pthread_attr_t attr; /* os atributos da thread */
+    	pthread_attr_init(&attr); /* ajusta os atributos padrao da thread */
+    	pthread_create(&tid, &attr, sondagem, argv[1]); /* cria a thread */
     }
     
     printf("Primos encontrados %d \n", contPrimos);
@@ -109,6 +99,32 @@ int main() {
     return 0;
 }
 
-    
+/* FUNCAO DE SONDAGEM */
 
+int sondagem(int macrobloco){
+        for (int i = 0; i < ROWS; i++) { // sonda o macrobloco //
+            for (int j = 0; j < COLS; j++) {
+                contPrimos += ehPrimo(macrobloco[i][j]);
+            }
+        }
+return contPrimos;
 
+/**********************FUNCAO EHPRIMO***********************/
+
+int ehPrimo(int numero) {
+    int cont = 0;
+    int raiz = sqrt(numero);
+    for (int i = 0; i <= raiz; i++) {
+        if (numero % i == 0) {
+            return 1;
+        }
+    }
+
+    /*if (cont == 1) {
+        printf("O numero %d eh primo ", &numero);
+        printf("");
+        return 1;
+    }*/
+
+    return 0;
+}
