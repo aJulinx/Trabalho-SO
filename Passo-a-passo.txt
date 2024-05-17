@@ -6,6 +6,7 @@ PASSO A PASSO DO CÓDIGO:
 2) Dividir em macroblocos
 	* Todos com o mesmo tamanho, pelo #define
 	* Macrobloco deve ser alocado
+	* Tamanho varia entre 1 macrobloco e N macroblocos (N é o número de elementos da matriz) 
 
 3) Criar uma thread pra cada macrobloco
 	Passar a função de sondagem do macrobloco
