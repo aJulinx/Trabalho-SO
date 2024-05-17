@@ -4,7 +4,8 @@ PASSO A PASSO DO CÓDIGO:
 	* Matriz deve ser global
 
 2) Dividir em macroblocos
-  * Todos com o mesmo tamanho, pelo #define
+	* Todos com o mesmo tamanho, pelo #define
+	* Macrobloco deve ser alocado
 
 3) Criar uma thread pra cada macrobloco
 	Passar a função de sondagem do macrobloco
