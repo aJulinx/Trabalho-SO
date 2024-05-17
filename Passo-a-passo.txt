@@ -1,0 +1,16 @@
+PASSO A PASSO DO CÓDIGO:
+
+1) Gerar a matriz - Alocar e preencher
+	* Matriz deve ser global
+
+2) Dividir em macroblocos
+  * Todos com o mesmo tamanho, pelo #define
+
+3) Criar uma thread pra cada macrobloco
+	Passar a função de sondagem do macrobloco
+	
+	
+PERGUNTAS:
+
+* Podemos preencher a matriz e criar os macroblocos ao mesmo tempo?
+* Os macroblocos podem ser arrays?
