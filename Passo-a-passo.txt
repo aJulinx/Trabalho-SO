@@ -9,7 +9,6 @@ PASSO A PASSO DO CÓDIGO:
 3) Criar uma thread pra cada macrobloco
 	Passar a função de sondagem do macrobloco
 	
-	
 PERGUNTAS:
 
 * Podemos preencher a matriz e criar os macroblocos ao mesmo tempo?
