@@ -17,7 +17,7 @@ int contPrimosTotal = 0;
 
 /* funcoes globais */
 int ehPrimo(int numero);
-int sondagem(matriz[i]);
+int *sondagem(matriz[i]);
 
 int** Alocar_matriz_real() {
     int** p;
