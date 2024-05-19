@@ -129,9 +129,7 @@ int main() {
     }
 
     /*************DANDO UM FIM NAS THREADS*************/
-
-    
-    
+ 
     printf("Primos encontrados %d \n", contPrimos);
 
 
