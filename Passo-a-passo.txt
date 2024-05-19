@@ -1,12 +1,17 @@
 PASSO A PASSO DO CÓDIGO:
 
+N é o número de elementos da matriz.
+
 1) Gerar a matriz - Alocar e preencher
 	* Matriz deve ser global
 
 2) Dividir em macroblocos
 	* Todos com o mesmo tamanho, pelo #define
-	* Macrobloco deve ser alocado
-	* Tamanho varia entre 1 macrobloco e N macroblocos (N é o número de elementos da matriz) 
+		Para isso, o tamanho deve ser sempre um divisor de N.
+	* Macrobloco deve ser alocado como vetor. Deve-se criar um vetor para cada macrobloco.
+	2.1) Criar um loop que varia de 1 a N
+	2.2) Criar um vetor para cada macrobloco
+	2.3) Preencher os vetores com os elementos da matriz.
 
 3) Criar uma thread pra cada macrobloco
 	Passar a função de sondagem do macrobloco
