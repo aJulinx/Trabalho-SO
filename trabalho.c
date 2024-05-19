@@ -120,7 +120,6 @@ int main() {
     for (int i = 0; i < NUM_THREADS; i++){ // A matriz já é o conjunto de macroblocos //
     	for (int j = 0; j < NUM_ELEMS; j++){
     		matriz[i][j] = rand() % 32000;
-    	pthread_t (i+1); /* o identificador da thread */
         pthread_attr_t attr; /* os atributos da thread */
         pthread_attr_init(&attr); /* ajusta os atributos padrao da thread */
         pthread_create(&(i+1), &attr, sondagem, argv[1]); /* cria a thread */
