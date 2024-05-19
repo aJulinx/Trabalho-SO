@@ -70,47 +70,6 @@ int** Liberar_matriz_real(int** matriz) {
 
 }
 
-int main() {
-    int contPrimos = 0;
-    time_t t;
-    int **matriz;
-
-    matriz = Alocar_matriz_real(ROWS, COLS); //Alocando matriz
-
-    t = time(NULL);
-    srand(time(0));
-
-    for (int i = 0; i < ROWS; i++) { //Preenchendo a matriz
-        for (int j = 0; j < COLS; j++) {
-            matriz[i][j] = rand() % 32000;
-        }
-    }
-
-    /* criação das threads (também num loop for)*/
-    /* CRIACAO DOS MACROBLOCOS */
-    for (int i = 1; i <= NUM_THREADS; i++){
-    	pthread_t tid; /* o identificador da thread */
-    	pthread_attr_t attr; /* os atributos da thread */
-    	pthread_attr_init(&attr); /* ajusta os atributos padrao da thread */
-    	pthread_create(&tid, &attr, sondagem, argv[1]); /* cria a thread */
-    }
-    
-    printf("Primos encontrados %d \n", contPrimos);
-
-
-    return 0;
-}
-
-/* FUNCAO DE SONDAGEM */
-
-int sondagem(int macrobloco){
-        for (int i = 0; i < ROWS; i++) { // sonda o macrobloco //
-            for (int j = 0; j < COLS; j++) {
-                contPrimos += ehPrimo(macrobloco[i][j]);
-            }
-        }
-return contPrimos;
-
 /**********************FUNCAO EHPRIMO***********************/
 
 int ehPrimo(int numero) {
@@ -131,8 +90,39 @@ int ehPrimo(int numero) {
     return 0;
 }
 
-/*******************************************MACROBLOCOS*********************************************/
+/*************************************FUNCAO DE SONDAGEM*****************************************/
 
-for (int i = 0; i < NUM_ELEMS; i++){
-    macrobloco[i] = matriz[i*(NUM_ELEMS + 1)];
+int sondagem(int macrobloco){
+        for (int i = 0; i < ROWS; i++) { // sonda o macrobloco //
+            for (int j = 0; j < COLS; j++) {
+                contPrimos += ehPrimo(macrobloco[i][j]);
+            }
+        }
+return contPrimos;
+
+/**************************************************FUNÇÃO MAIN()***********************************************************/
+
+int main() {
+    int contPrimos = 0;
+    time_t t;
+    int **matriz;
+
+    matriz = Alocar_matriz_real(NUM_THREADS, NUM_ELEMS); //Alocando matriz
+
+    t = time(NULL);
+    srand(time(0));
+
+    for (int i = 0; i < NUM_THREADS; i++){ // A matriz já é o conjunto de macroblocos //
+    	for (int j = 0; j < NUM_ELEMS; j++){
+    		matriz[i][j] = rand() % 32000;
+    	pthread_t tid; /* o identificador da thread */
+        	pthread_attr_t attr; /* os atributos da thread */
+        	pthread_attr_init(&attr); /* ajusta os atributos padrao da thread */
+        	pthread_create(&tid, &attr, sondagem, argv[1]); /* cria a thread */
+    }
+    
+    printf("Primos encontrados %d \n", contPrimos);
+
+
+    return 0;
 }
