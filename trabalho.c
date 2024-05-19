@@ -10,7 +10,8 @@
 #define ROWS 10
 #define COLS 10
 
-/* variavel global */
+/* variaveis global */
+int matriz[i][j]
 int contPrimosTotal = 0;
 
 /* funcoes globais */
@@ -80,7 +81,7 @@ int main() {
 
     for (int i = 0; i < ROWS; i++) { //Preenchendo a matriz
         for (int j = 0; j < COLS; j++) {
-            matriz[i][j] = rand() % 100;
+            matriz[i][j] = rand() % 32000;
         }
     }
 
