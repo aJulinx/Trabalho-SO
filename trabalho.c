@@ -17,7 +17,7 @@ int contPrimosTotal = 0;
 
 /* funcoes globais */
 int ehPrimo(int numero);
-int sondagem(macrobloco[i][j]);
+int sondagem(matriz[i]);
 
 int** Alocar_matriz_real() {
     int** p;
@@ -98,7 +98,8 @@ int sondagem(int macrobloco){
                 contPrimos += ehPrimo(macrobloco[i][j]);
             }
         }
-return contPrimos;
+        pthread_exit(0);
+}
 
 /**************************************************FUNÇÃO MAIN()***********************************************************/
 
@@ -112,14 +113,24 @@ int main() {
     t = time(NULL);
     srand(time(0));
 
+    pthread_t workers[NUM_THREADS]; /* um array de threads a serem unidas */
+
+    /**************MATRIZES E MACROBLOCOS**************/
+
     for (int i = 0; i < NUM_THREADS; i++){ // A matriz já é o conjunto de macroblocos //
     	for (int j = 0; j < NUM_ELEMS; j++){
     		matriz[i][j] = rand() % 32000;
-    	pthread_t tid; /* o identificador da thread */
-        	pthread_attr_t attr; /* os atributos da thread */
-        	pthread_attr_init(&attr); /* ajusta os atributos padrao da thread */
-        	pthread_create(&tid, &attr, sondagem, argv[1]); /* cria a thread */
+    	pthread_t (i+1); /* o identificador da thread */
+        pthread_attr_t attr; /* os atributos da thread */
+        pthread_attr_init(&attr); /* ajusta os atributos padrao da thread */
+        pthread_create(&(i+1), &attr, sondagem, argv[1]); /* cria a thread */
+        pthread_join((i+1), NULL); /* espera pelo termino da thread */
+        pthread_join(workers[i], NULL);
     }
+
+    /*************DANDO UM FIM NAS THREADS*************/
+
+    
     
     printf("Primos encontrados %d \n", contPrimos);
 
