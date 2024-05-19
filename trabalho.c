@@ -9,6 +9,7 @@
 #define NUM_THREADS 1 /* define o numero de threads */
 #define ROWS 10
 #define COLS 10
+#define NUM_ELEMS ((ROWS*COLS)/NUM_THREADS)
 
 /* variaveis global */
 int matriz[i][j]
@@ -128,4 +129,10 @@ int ehPrimo(int numero) {
     }*/
 
     return 0;
+}
+
+/*******************************************MACROBLOCOS*********************************************/
+
+for (int i = 0; i < NUM_ELEMS; i++){
+    macrobloco[i] = matriz[i*(NUM_ELEMS + 1)];
 }
