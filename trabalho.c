@@ -1,135 +1,139 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <conio.h>
 #include <time.h>
-#include <malloc.h>
-#include <pthread.h>
+#include <math.h>
 
-#define NUM_THREADS 1 /* define o numero de threads */
-#define ROWS 10
-#define COLS 10
-#define NUM_ELEMS ((ROWS*COLS)/NUM_THREADS)
+#define LINHAS 10000
+#define COLUNAS 10000
+#define MAX_RANDOM 31999
+#define TAM_MACRO 1
 
-/* variaveis global */
-int matriz[i][j]
-int contPrimosTotal = 0;
+typedef struct {
+    int **pont;
+    int linha;
+    int fim_linha;
+    int inicio_coluna;
+    int fim_coluna;
+}Matriz;
 
-/* funcoes globais */
-int ehPrimo(int numero);
-int *sondagem(matriz[i]);
-
-int** Alocar_matriz_real() {
-    int** p;
-    int i;
-
-    if (ROWS < 1 || COLS < 1) {
-        printf("Parametros invalidos");
+Matriz* alocar_matriz(int m, int n) {
+    Matriz* mat = malloc(sizeof(Matriz));
+    
+    if (mat == NULL) {
+        printf("** Erro: Deu erro, faz parte");
+        return NULL;
+    }
+    if (m < 1 || n < 1) {
+        //verifica se é valido /
+        printf(" Erro: Parametro invalido \n");
         return (NULL);
     }
 
-    p = calloc(ROWS, sizeof(int*));
-    if (p == NULL) {
-        printf("ERROR, MEMORIA INSUFICIENTE");
-        exit(1);
+    // aloca as linhas da matriz /
+    mat->pont = calloc(m, sizeof(int*));
+    if (mat->pont == NULL) {
+        printf(" Erro: Memoria insuficiente");
+        return(NULL);
     }
-
-    for (i = 0; i < ROWS; i++) {
-        p[i] = calloc(COLS, sizeof(int));
-        if (p[i] == NULL) {
-            printf("** ERROR, Memoria Insuficiente **");
-            exit(1);
+    for (int i = 0; i < m; i++) {
+        mat->pont[i] = calloc(n, sizeof(int)); // m vetores de n int /
+        if (mat->pont[i] == NULL) {
+            printf(" Erro: Memoria insuficiente");
+            return (NULL);
         }
     }
 
-    return (p);
+    return (mat); // retorna o ponteiro para matriz /
 
-    /*Matriz* create(ROWS, COLS);
-    int** matriz = (int**)malloc(ROWS * sizeof(int*));
-    for (int i = 0; i < COLS; i++)
-        matriz[i] = (int*)malloc(COLS * sizeof(int));
-
-    return matriz;*/
 }
 
-int** Liberar_matriz_real(int** matriz) {
-    int i;
+void liberar_matriz_real(int m, int n, Matriz *mat) {
 
-    if (matriz == NULL) return (NULL);
-
-    if (ROWS < 1 || COLS < 1) {
-        printf("** Erro: Parametro invalido **");
-        return (matriz);
+    if (mat == NULL) {
+        return (NULL);
     }
 
-    for (i = 0; i < ROWS; i++) free(matriz[i]);
+    if (m < 1 || n < 1) {
+        // verifica se é valido /
+        printf(" Erro: Parametro invalido \n");
+        return (NULL);
+    }
 
-    free(matriz);
+    for (int i = 0; i < m; i++) {
+        free(mat->pont[i]); // libera as linhas da matriz /
+    }
+
+    free(mat); // libera a matriz /
 
     return (NULL);
-
 }
-
-/**********************FUNCAO EHPRIMO***********************/
 
 int ehPrimo(int numero) {
-    int cont = 0;
     int raiz = sqrt(numero);
-    for (int i = 0; i <= raiz; i++) {
+
+    if (numero <= 1) return 0;
+    if (numero == 2) return 1;
+    if (numero % 2 == 0) return 0;
+
+    for (int i = 3; i <= raiz; i+=2) {
         if (numero % i == 0) {
-            return 1;
+            return 0;
         }
     }
 
-    /*if (cont == 1) {
-        printf("O numero %d eh primo ", &numero);
-        printf("");
-        return 1;
-    }*/
-
-    return 0;
+    return 1;
 }
 
-/*************************************FUNCAO DE SONDAGEM*****************************************/
+void preencher_matriz(Matriz *mat) {
+    srand(time(NULL));
+    for (int i = 0; i < LINHAS; i++) {
+        for (int j = 0; j < COLUNAS; j++) {
+            mat->pont[i][j] = rand() % (MAX_RANDOM + 1);
+        }
+    }
+}
+Matriz* mat;
+int totalprimos;
 
-int sondagem(int macrobloco){
-        for (int i = 0; i < ROWS; i++) { // sonda o macrobloco //
-            for (int j = 0; j < COLS; j++) {
-                contPrimos += ehPrimo(macrobloco[i][j]);
+void BuscaSerial(Matriz* mat) {
+    mat->linha = 0;
+    mat->fim_linha = TAM_MACRO;
+    mat->inicio_coluna = 0;
+    mat->fim_coluna = TAM_MACRO;
+
+    while (mat->linha < LINHAS) {
+        mat->inicio_coluna = 0;
+        mat->fim_coluna = TAM_MACRO;
+        while (mat->inicio_coluna < COLUNAS) {
+            for (int i = mat->linha; i < mat->fim_linha && i < LINHAS; i++) {
+                for (int j = mat->inicio_coluna; j < mat->fim_coluna && j < COLUNAS; j++) {
+                    totalprimos += ehPrimo(mat->pont[i][j]);
+                    
+                }
+                
             }
+           
+            mat->inicio_coluna += TAM_MACRO;
+            mat->fim_coluna += TAM_MACRO;
         }
-        pthread_exit(0);
+
+        mat->linha += TAM_MACRO;
+        mat->fim_linha += TAM_MACRO;
+    }
 }
 
-/**************************************************FUNÇÃO MAIN()***********************************************************/
 
-int main() {
-    int contPrimos = 0;
-    time_t t;
-    int **matriz;
+int main(int argc, char* argv[]) {
+    srand(time(NULL));
 
-    matriz = Alocar_matriz_real(NUM_THREADS, NUM_ELEMS); //Alocando matriz
 
-    t = time(NULL);
-    srand(time(0));
+    mat = alocar_matriz(LINHAS, COLUNAS);
+    preencher_matriz(mat);
+    BuscaSerial(mat);
 
-    pthread_t workers[NUM_THREADS]; /* um array de threads a serem unidas */
+    printf("Total primos encontrados %d", totalprimos);
 
-    /**************MATRIZES E MACROBLOCOS**************/
 
-    for (int i = 0; i < NUM_THREADS; i++){ // A matriz já é o conjunto de macroblocos //
-    	for (int j = 0; j < NUM_ELEMS; j++){
-    		matriz[i][j] = rand() % 32000;
-        pthread_attr_t attr; /* os atributos da thread */
-        pthread_attr_init(&attr); /* ajusta os atributos padrao da thread */
-        pthread_create(&(i+1), &attr, sondagem, argv[1]); /* cria a thread */
-        pthread_join((i+1), NULL); /* espera pelo termino da thread */
-        pthread_join(workers[i], NULL);
-    }
-
-    /*************DANDO UM FIM NAS THREADS*************/
- 
-    printf("Primos encontrados %d \n", contPrimos);
 
 
     return 0;
