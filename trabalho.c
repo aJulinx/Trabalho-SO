@@ -10,118 +10,90 @@
 #include <time.h>
 #include <math.h>
 
-//Define o tamanho da matriz
-#define LINHAS 9
-#define COLUNAS 9
-//Semente para geracao dos numeros aleatorios
+// Define o tamanho da matriz
+#define LINHAS 10000
+#define COLUNAS 10000
+// Semente para geracao dos numeros aleatorios
 #define MAX_RANDOM 31999
-//Define o tamanho dos macroblocos
-#define TAM_MACRO 3
-//Define a quantitdade de threads
-#define NUM_THREADS 100
+// Define o tamanho dos macroblocos
+#define TAM_MACRO 1
+// Define a quantidade de threads
+#define NUM_THREADS 6
 
-
-
-//Estruct da matriz, contem o ponteiro para a matriz, informações que ajudam a localizar os macroblocos
+// Estrutura da matriz, contem o ponteiro para a matriz e outras informações
 typedef struct {
-    int **pont;
-    int linha;
-    int fim_linha;
-    int inicio_coluna;
-    int fim_coluna;
-    int fim_matriz;
-    int cont;
-}Matriz;
+    int** pont;
+    int proximo_macrobloco;
+} Matriz;
 
-
-//Variaveis Globais
+// Variáveis Globais
 Matriz* mat;
-int totalprimos;
 pthread_mutex_t mutex;
+int totalprimos;
 
-//Seguindo o roteiro
-void *buscaParalela(void* param);
 
-//Funcao que aloca a matriz, obrigado Giraldeli
+// Função que aloca a matriz seguindo o livro do professor
 Matriz* alocar_matriz(int m, int n) {
-    //Cria a struct
+    // Cria a struct
     Matriz* mat = malloc(sizeof(Matriz));
-    
-    //Verifica se alocou
+    // Verifica se alocou
     if (mat == NULL) {
-        printf("** Erro: Deu erro, faz parte");
+        printf("** Erro: Memoria insuficiente **");
         return NULL;
     }
-    //Verifica se os parametros sao validos
+    // Verifica se os parâmetros são válidos
     if (m < 1 || n < 1) {
-        //verifica se é valido /
-        printf(" Erro: Parametro invalido \n");
-        return (NULL);
+        printf("** Erro: Parametro invalido **\n");
+        return NULL;
     }
-
-    // aloca as linhas da matriz /
+    // Aloca as linhas da matriz
     mat->pont = calloc(m, sizeof(int*));
     if (mat->pont == NULL) {
-        printf(" Erro: Memoria insuficiente");
-        return(NULL);
+        printf("** Erro: Memoria insuficiente **\n");
+        return NULL;
     }
     for (int i = 0; i < m; i++) {
-        mat->pont[i] = calloc(n, sizeof(int)); // m vetores de n int /
+        mat->pont[i] = calloc(n, sizeof(int)); // m vetores de n int
         if (mat->pont[i] == NULL) {
-            printf(" Erro: Memoria insuficiente");
-            return (NULL);
+            printf("** Erro: Memoria insuficiente **\n");
+            return NULL;
         }
     }
 
-    mat->inicio_coluna = 0;
-    mat->fim_coluna = TAM_MACRO;
-    mat->fim_matriz = 0;
-
-    return (mat); // retorna o ponteiro para matriz /
-
+    return mat; // Retorna o ponteiro para a matriz
 }
 
-//Libera a matriz, obrigado Giraldeli²
-void liberar_matriz_real(int m, int n, Matriz *mat) {
-
+// Libera a matriz
+void liberar_matriz_real(int m, int n, Matriz* mat) {
     if (mat == NULL) {
-        return (NULL);
+        return;
     }
-
     if (m < 1 || n < 1) {
-        // verifica se é valido /
-        printf(" Erro: Parametro invalido \n");
-        return (NULL);
+        printf("** Erro: Parametro invalido **\n");
+        return;
     }
-
     for (int i = 0; i < m; i++) {
-        free(mat->pont[i]); // libera as linhas da matriz /
+        free(mat->pont[i]); // Libera as linhas da matriz
     }
-
-    free(mat); // libera a matriz /
-
-    return (NULL);
+    free(mat); // Libera a matriz
 }
 
-//Funcao para verificar se eh primo, obrigado Giraldeli³
+// Função para verificar se é primo, seguindo as dicas do professor
 int ehPrimo(int numero) {
     int raiz = sqrt(numero);
-
     if (numero <= 1) return 0;
     if (numero == 2) return 1;
     if (numero % 2 == 0) return 0;
-
-    for (int i = 3; i <= raiz; i+=2) {
+    for (int i = 3; i <= raiz; i += 2) {
         if (numero % i == 0) {
             return 0;
         }
     }
-
     return 1;
 }
 
-//Funcao para preencher a matriz com os numeros aleatorios
-void preencher_matriz(Matriz *mat) {
+// Função para preencher a matriz com números aleatórios
+void preencher_matriz(Matriz* mat) {
     srand(time(NULL));
     for (int i = 0; i < LINHAS; i++) {
         for (int j = 0; j < COLUNAS; j++) {
@@ -130,36 +102,8 @@ void preencher_matriz(Matriz *mat) {
     }
 }
 
-
-
-//Busca Serial, ira percorrer macrobloco por macroblo, chamando a funcao de primos
+// Busca Serial, ela é tão simples assim mesmo ?
 void buscaSerial(Matriz* mat) {
-    //Nao sei por que, mas tentei fazer isso na funcao que cria a matriz, mas nao gerava o resultado que eu espera
-    //entao fiz aqui dentro e deu certo, eu so aceitei e deixei
-    //Seta o tamanho do macrobloco atual
-    /*mat->linha = 0;
-    mat->fim_linha = TAM_MACRO;
-
-    //Enquanto todas as linhas da matriz nao forem percorridos
-    while (mat->linha < LINHAS) {
-        //Testei do lado de fora e o resultado nao foi certo, novamente nao faco ideia do que fiz de errado, mas aqui dentro da certo
-        mat->inicio_coluna = 0;
-        mat->fim_coluna = TAM_MACRO;
-        //Como as colunas dos macroblocos variam mais
-        while (mat->inicio_coluna < COLUNAS) {
-            for (int i = mat->linha; i < mat->fim_linha && i < LINHAS; i++) {
-                for (int j = mat->inicio_coluna; j < mat->fim_coluna && j < COLUNAS; j++) {
-                    totalprimos += ehPrimo(mat->pont[i][j]);                
-                }
-                
-            }       
-            mat->inicio_coluna += TAM_MACRO;
-            mat->fim_coluna += TAM_MACRO;
-        }
-        mat->linha += TAM_MACRO;
-        mat->fim_linha += TAM_MACRO;
-    }*/
-
     for (int i = 0; i < LINHAS; i++) {
         for (int j = 0; j < COLUNAS; j++) {
             totalprimos += ehPrimo(mat->pont[i][j]);
@@ -167,72 +111,106 @@ void buscaSerial(Matriz* mat) {
     }
 }
 
-void *buscaParalela(void *param) {
+// Função de busca paralela
+void* buscaParalela(void* param) {
+    //Variaveis auxiliares, criei elas para faciltiar a manipulação das threads, ao utilizar diretamente os elementos da struct, a função não funciona do jeito certo
     int primos;
+    int linha, coluna, fim_linha, fim_coluna;
 
-    //Enquanto todas as linhas da matriz nao forem percorridos
-    while (mat->linha < LINHAS) {
-        //Testei do lado de fora e o resultado nao foi certo, novamente nao faco ideia do que fiz de errado, mas aqui dentro da certo
-        mat->inicio_coluna = 0;
-        mat->fim_coluna = TAM_MACRO;
-        //Como as colunas dos macroblocos variam mais
-        while (mat->inicio_coluna < COLUNAS) {
-            for (int i = mat->linha; i < mat->fim_linha && i < LINHAS; i++) {
-                for (int j = mat->inicio_coluna; j < mat->fim_coluna && j < COLUNAS; j++) {                                      
-                    pthread_mutex_lock(&mutex);
-                    primos = ehPrimo(mat->pont[i][j]);
-                    totalprimos += primos;
-                    pthread_mutex_unlock(&mutex);
-                    
-                }
-
-            }
-            //pthread_mutex_lock(&mutex);
-            mat->inicio_coluna += TAM_MACRO;
-            mat->fim_coluna += TAM_MACRO;
-            //pthread_mutex_unlock(&mutex);
+    //De inicio havia criado uma variavel na struc que serviria para isso, decidi usar algo que os professores odeiam, break
+    //o motivo foi que, ao utilziar a variavel na struct para isso, acabei tendo muito trabalho e ainda sim erros, algumas threads finalizavam e marcavam como concluido
+    //fazendo necessario o uso de mutex, como o abaixo
+    while (1) {
+        //Mutex para identificar se ainda há elementos na matriz para percorrer, é a variável de controle do while
+        pthread_mutex_lock(&mutex);
+        if (mat->proximo_macrobloco >= (LINHAS / TAM_MACRO) * (COLUNAS / TAM_MACRO)) {
+            pthread_mutex_unlock(&mutex);
+            break;
         }
-       // pthread_mutex_lock(&mutex);
-        mat->linha += TAM_MACRO;
-        mat->fim_linha += TAM_MACRO;
-       // pthread_mutex_unlock(&mutex);
-    }
+        //Adaptei para o novo while, antes esse mutex verificava a variavel da struc que marcava a matriz como percorrida
+        //o motivo do mutex foi justamente para controlar as threads e nao deixar elas marcarem como concluido antes do fim
 
+        //Variavei para guiar as threads para o proximo macrobloco, mutex nela para garantir que as threads nao se confundam
+        int bloco_atual = mat->proximo_macrobloco++;
+        pthread_mutex_unlock(&mutex);
+
+        //Parte mais importante, ela define os macroblocos para a thread percorrer, linha por linha e coluna por coluna.        
+        //Calcula o numero de blocos por linha, encontra em qual linha da matriz esta o bloco, e encontra o indice de inicio do macrobloco
+        linha = (bloco_atual / (COLUNAS / TAM_MACRO)) * TAM_MACRO;
+        coluna = (bloco_atual % (COLUNAS / TAM_MACRO)) * TAM_MACRO;
+        //Determinam em qual elemento da matriz é o fim do macrobloco atual
+        fim_linha = linha + TAM_MACRO;
+        fim_coluna = coluna + TAM_MACRO;
+
+        //Reseta o contador de primos
+        primos = 0;
+
+        //Busca serial basicamente
+        for (int i = linha; i < fim_linha && i < LINHAS; i++) {
+            for (int j = coluna; j < fim_coluna && j < COLUNAS; j++) {
+                if (ehPrimo(mat->pont[i][j])) {
+                    primos++;
+                }
+            }
+        }
+
+        //Mutex para acrescentar os primos encontrados pelas threads a variavel global
+        pthread_mutex_lock(&mutex);
+        totalprimos += primos;
+        pthread_mutex_unlock(&mutex);
+    }
+    //Termina a thread
+    pthread_exit(0);
 }
 
-int main(int argc, char* argv[]) {
 
+int main(int argc, char* argv[]) {
+    //Double para o tempo ser mais preciso
+    double tempo;
+    double tempo2;
+    //Criação das threads e o mutex
     pthread_t workers[NUM_THREADS];
     pthread_mutex_init(&mutex, NULL);
 
+    //Aloca a matriz e a preencha
     mat = alocar_matriz(LINHAS, COLUNAS);
     preencher_matriz(mat);
-    
-    mat->cont = 0;
-    mat->linha = 0;
-    mat->fim_linha = TAM_MACRO;
+
+    //Define o macrobloco 
+    mat->proximo_macrobloco = 0;
 
 
+    //Medição do tempo de busca
+    //Essa parte procurei na internet para saber como fazer a medição
+    clock_t iniciar_cronometro = clock();
     buscaSerial(mat);
+    clock_t finalizar_cronometro = clock();
+    tempo = (double)(finalizar_cronometro - iniciar_cronometro) / CLOCKS_PER_SEC;
 
-    printf("Total primos encontrados %d \n", totalprimos);
+    printf("Primos encontrados : %d\n", totalprimos);
+    printf("Busca Serial em : %f segundos\n", tempo);
 
+    //Reset totalprimos para busca paralela
     totalprimos = 0;
+    mat->proximo_macrobloco = 0; // Reset para a busca paralela
 
-
+    // Medir o tempo da busca paralela
+    clock_t iniciar_cronometro2 = clock();
     for (int i = 0; i < NUM_THREADS; i++) {
-        pthread_create(&workers[i], NULL, buscaParalela, NULL);
+        pthread_create(&workers[i], NULL, buscaParalela,NULL);
     }
-
     for (int i = 0; i < NUM_THREADS; i++) {
         pthread_join(workers[i], NULL);
     }
+    clock_t finalizar_cronometro2 = clock();
+    tempo2 = (double)(finalizar_cronometro2 - iniciar_cronometro2) / CLOCKS_PER_SEC;
 
-    
+    printf("Primos encontrados : %d\n", totalprimos);
+    printf("Busca Paralela em : %f segundos\n", tempo2);
 
-    
-    printf("Total de primos encontrados nas threads %d", totalprimos);
+    //Liberação da memoria
+    liberar_matriz_real(LINHAS, COLUNAS, mat);
+    pthread_mutex_destroy(&mutex);
 
-    
     return 0;
 }
