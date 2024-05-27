@@ -11,14 +11,14 @@
 #include <math.h>
 
 // Define o tamanho da matriz
-#define LINHAS 10000
-#define COLUNAS 10000
+#define LINHAS 15000
+#define COLUNAS 15000
 // Semente para geracao dos numeros aleatorios
 #define MAX_RANDOM 31999
 // Define o tamanho dos macroblocos
-#define TAM_MACRO 1
+#define TAM_MACRO 10
 // Define a quantidade de threads
-#define NUM_THREADS 6
+#define NUM_THREADS 12
 
 // Estrutura da matriz, contem o ponteiro para a matriz e outras informações
 typedef struct {
@@ -130,7 +130,7 @@ void* buscaParalela(void* param) {
         //Adaptei para o novo while, antes esse mutex verificava a variavel da struc que marcava a matriz como percorrida
         //o motivo do mutex foi justamente para controlar as threads e nao deixar elas marcarem como concluido antes do fim
 
-        //Variavei para guiar as threads para o proximo macrobloco, mutex nela para garantir que as threads nao se confundam
+        //Variavel para guiar as threads para o proximo macrobloco, mutex nela para garantir que as threads nao se confundam
         int bloco_atual = mat->proximo_macrobloco++;
         pthread_mutex_unlock(&mutex);
 
